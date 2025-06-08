@@ -1,17 +1,14 @@
-import { loadEnv, defineConfig, Modules } from '@medusajs/framework/utils';
-
-loadEnv(process.env.NODE_ENV || 'development', process.cwd());
-
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
+const utils_1 = require('@medusajs/framework/utils');
+(0, utils_1.loadEnv)(process.env.NODE_ENV || 'development', process.cwd());
 const dynamicModules = {};
-
 const stripeApiKey = process.env.STRIPE_API_KEY;
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
 const isStripeConfigured = Boolean(stripeApiKey) && Boolean(stripeWebhookSecret);
-
 if (isStripeConfigured) {
   console.log('Stripe API key and webhook secret found. Enabling payment module');
-  dynamicModules[Modules.PAYMENT] = {
+  dynamicModules[utils_1.Modules.PAYMENT] = {
     resolve: '@medusajs/medusa/payment',
     options: {
       providers: [
@@ -27,11 +24,9 @@ if (isStripeConfigured) {
     }
   };
 }
-
 const plugins = [];
-
 const modules = {
-  [Modules.FILE]: {
+  [utils_1.Modules.FILE]: {
     resolve: '@medusajs/medusa/file',
     options: {
       providers: [
@@ -50,7 +45,7 @@ const modules = {
       ]
     }
   },
-  [Modules.NOTIFICATION]: {
+  [utils_1.Modules.NOTIFICATION]: {
     resolve: '@medusajs/medusa/notification',
     options: {
       providers: [
@@ -70,8 +65,7 @@ const modules = {
     }
   }
 };
-
-module.exports = defineConfig({
+module.exports = (0, utils_1.defineConfig)({
   admin: {
     backendUrl: process.env.MEDUSA_BACKEND_URL,
     disable: process.env.DISABLE_MEDUSA_ADMIN === 'true'
