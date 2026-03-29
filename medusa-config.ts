@@ -30,24 +30,45 @@ if (isStripeConfigured) {
 
 const plugins = [];
 
+// Check if S3/DO Spaces is configured
+const isS3Configured = Boolean(
+  process.env.DO_SPACE_ACCESS_KEY && 
+  process.env.DO_SPACE_SECRET_KEY
+);
+
+const fileProviders = [];
+
+if (isS3Configured) {
+  console.log('✅ S3/DO Spaces file storage enabled');
+  fileProviders.push({
+    resolve: '@medusajs/file-s3',
+    id: 's3',
+    options: {
+      file_url: process.env.DO_SPACE_URL,
+      access_key_id: process.env.DO_SPACE_ACCESS_KEY,
+      secret_access_key: process.env.DO_SPACE_SECRET_KEY,
+      region: process.env.DO_SPACE_REGION,
+      bucket: process.env.DO_SPACE_BUCKET,
+      endpoint: process.env.DO_SPACE_ENDPOINT
+    }
+  });
+} else {
+  console.log('⚠️  S3 credentials not found. Using local file storage for development.');
+  fileProviders.push({
+    resolve: '@medusajs/file-local',
+    id: 'local',
+    options: {
+      upload_dir: 'uploads',
+      backend_url: process.env.BACKEND_URL || 'http://localhost:9000'
+    }
+  });
+}
+
 const modules = {
   [Modules.FILE]: {
     resolve: '@medusajs/medusa/file',
     options: {
-      providers: [
-        {
-          resolve: '@medusajs/file-s3',
-          id: 's3',
-          options: {
-            file_url: process.env.DO_SPACE_URL,
-            access_key_id: process.env.DO_SPACE_ACCESS_KEY,
-            secret_access_key: process.env.DO_SPACE_SECRET_KEY,
-            region: process.env.DO_SPACE_REGION,
-            bucket: process.env.DO_SPACE_BUCKET,
-            endpoint: process.env.DO_SPACE_ENDPOINT
-          }
-        }
-      ]
+      providers: fileProviders
     }
   },
   [Modules.NOTIFICATION]: {
